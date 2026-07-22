@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<title>PM Checklist</title>
+<style>
+  :root{
+    --bg:#e9edf0; --surface:#ffffff; --surface-2:#f4f7f8;
+    --ink:#15202a; --ink-2:#5c6d79; --ink-3:#8494a0;
+    --line:#dde4e9; --line-2:#eaeff2;
+    --accent:#0f766e; --accent-soft:#d6ebe8; --accent-ink:#ffffff;
+    --red:#b3261e; --red-soft:#f7dedb;
+    --amber:#8a5a00; --amber-soft:#f6e7c8;
+    --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0b1216; --surface:#131d23; --surface-2:#0f181d;
+      --ink:#e7eef2; --ink-2:#93a4af; --ink-3:#63737e;
+      --line:#243640; --line-2:#1a2830;
+      --accent:#2dd4bf; --accent-soft:#123832; --accent-ink:#052620;
+      --red:#f1836e; --red-soft:#3a1c19;
+      --amber:#e2ab55; --amber-soft:#33280f;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#e9edf0; --surface:#ffffff; --surface-2:#f4f7f8;
+    --ink:#15202a; --ink-2:#5c6d79; --ink-3:#8494a0;
+    --line:#dde4e9; --line-2:#eaeff2;
+    --accent:#0f766e; --accent-soft:#d6ebe8; --accent-ink:#ffffff;
+    --red:#b3261e; --red-soft:#f7dedb;
+    --amber:#8a5a00; --amber-soft:#f6e7c8;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0b1216; --surface:#131d23; --surface-2:#0f181d;
+    --ink:#e7eef2; --ink-2:#93a4af; --ink-3:#63737e;
+    --line:#243640; --line-2:#1a2830;
+    --accent:#2dd4bf; --accent-soft:#123832; --accent-ink:#052620;
+    --red:#f1836e; --red-soft:#3a1c19;
+    --amber:#e2ab55; --amber-soft:#33280f;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+    line-height:1.45; -webkit-font-smoothing:antialiased;
+    display:flex; justify-content:center; padding:0 clamp(0px,3vw,28px);
+  }
+  .phone{width:100%; max-width:448px; min-height:100vh; background:var(--surface-2);
+    border-left:1px solid var(--line); border-right:1px solid var(--line); display:flex; flex-direction:column}
+
+  /* lock gate */
+  #gate{position:fixed; inset:0; z-index:100; background:var(--bg); display:grid; place-items:center; padding:24px}
+  #gate .card{width:100%; max-width:320px; text-align:center}
+  #gate .mk{font-size:34px}
+  #gate h2{font-size:19px; margin:10px 0 4px; letter-spacing:-.01em}
+  #gate p{color:var(--ink-2); font-size:13px; margin-bottom:18px}
+  #gate input{width:100%; padding:12px 14px; font-size:15px; border-radius:11px; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink); text-align:center}
+  #gate input:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:transparent}
+  #gate button{width:100%; margin-top:10px; padding:12px; font-size:15px; font-weight:600; border:0; border-radius:11px;
+    background:var(--accent); color:var(--accent-ink); cursor:pointer}
+  #gate .err{color:var(--red); font-size:12.5px; min-height:16px; margin-top:10px}
+  #gate label{display:flex; align-items:center; justify-content:center; gap:7px; font-size:12px; color:var(--ink-3); margin-top:12px; cursor:pointer}
+
+  header{position:sticky; top:0; z-index:20; background:var(--surface); border-bottom:1px solid var(--line); padding:14px 18px 12px}
+  .eyebrow{display:flex; align-items:center; justify-content:space-between; font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
+  .eyebrow .live{display:inline-flex; align-items:center; gap:6px}
+  .dot{width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+  h1{font-size:22px; letter-spacing:-.02em; margin:4px 0 2px; font-weight:700}
+  h1 .day{color:var(--ink-2); font-weight:600}
+  .progress{margin-top:12px}
+  .progress .nums{display:flex; align-items:baseline; justify-content:space-between; font-size:13px; color:var(--ink-2)}
+  .progress .nums b{color:var(--ink); font-size:14px; font-variant-numeric:tabular-nums}
+  .bar{height:7px; border-radius:99px; background:var(--line-2); overflow:hidden; margin-top:7px}
+  .bar > i{display:block; height:100%; width:0; border-radius:99px; background:var(--accent); transition:width .45s cubic-bezier(.4,0,.2,1)}
+
+  .autonote{display:flex; gap:9px; align-items:flex-start; margin:12px 18px 0; padding:10px 12px; background:var(--accent-soft); border-radius:10px; font-size:12.5px; color:var(--ink); line-height:1.35}
+  .autonote svg{flex:none; margin-top:1px}
+
+  section{padding:16px 18px 0}
+  .lbl{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); font-weight:700; margin-bottom:9px; display:flex; align-items:center; gap:7px}
+  .lbl .count{background:var(--line-2); color:var(--ink-2); border-radius:99px; padding:1px 7px; font-size:10.5px; letter-spacing:0}
+  .agenda{display:flex; flex-direction:column; gap:8px}
+  .mtg{display:flex; align-items:center; gap:11px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:11px 13px}
+  .mtg .time{font-size:14px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.01em; white-space:nowrap}
+  .mtg .mtitle{font-size:13.5px; flex:1; min-width:0}
+  .mtg .mtitle small{display:block; color:var(--ink-2); font-size:11.5px; margin-top:1px}
+  .frentetag{font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:99px; background:var(--surface-2); border:1px solid var(--line); white-space:nowrap}
+
+  .tabs{display:flex; gap:6px; padding:16px 18px 4px}
+  .tab{flex:1; text-align:center; font-size:12.5px; font-weight:600; padding:8px 4px; border-radius:9px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2); cursor:pointer; user-select:none}
+  .tab[aria-selected="true"]{background:var(--ink); color:var(--surface); border-color:var(--ink)}
+  .tab .n{font-variant-numeric:tabular-nums; opacity:.7; margin-left:3px}
+  .hint{padding:2px 18px 0; font-size:11px; color:var(--ink-3); text-align:center}
+
+  .list{padding:6px 18px 28px; display:flex; flex-direction:column; gap:9px}
+  .grouphead{font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); font-weight:700; margin:14px 2px 2px}
+  .item{position:relative; display:flex; gap:12px; align-items:flex-start; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 13px 12px 14px; overflow:hidden; cursor:pointer; transition:border-color .15s, background .15s, opacity .2s; -webkit-tap-highlight-color:transparent}
+  .item::before{content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:transparent}
+  .item.sev-red::before{background:var(--red)}
+  .item.sev-amber::before{background:var(--amber)}
+  .box{flex:none; width:23px; height:23px; margin-top:1px; border-radius:7px; border:2px solid var(--ink-3); display:grid; place-items:center; transition:.15s}
+  .box svg{width:14px; height:14px; opacity:0; transform:scale(.5); transition:.15s; color:var(--accent-ink)}
+  .item .body{flex:1; min-width:0}
+  .item .txt{font-size:14px; letter-spacing:-.005em; line-height:1.32}
+  .meta{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; align-items:center}
+  .pill{font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:99px; white-space:nowrap; letter-spacing:.01em}
+  .pill.frente{background:var(--surface-2); border:1px solid var(--line); color:var(--ink-2)}
+  .pill.due-red{background:var(--red-soft); color:var(--red)}
+  .pill.due-amber{background:var(--amber-soft); color:var(--amber)}
+  .pill.due-flat{background:var(--surface-2); color:var(--ink-2); border:1px solid var(--line)}
+  .src{font-size:11px; color:var(--ink-3); margin-left:auto; white-space:nowrap}
+  .item.done{background:var(--surface-2); opacity:.62}
+  .item.done .box{background:var(--accent); border-color:var(--accent)}
+  .item.done .box svg{opacity:1; transform:scale(1)}
+  .item.done .txt{text-decoration:line-through; text-decoration-color:var(--ink-3); color:var(--ink-2)}
+  .item.autoclosed .box{background:var(--ink-3); border-color:var(--ink-3)}
+  .item.autoclosed .box svg{opacity:1; transform:scale(1); color:var(--surface)}
+  .empty{text-align:center; color:var(--ink-3); font-size:13px; padding:40px 20px}
+  footer{border-top:1px solid var(--line); background:var(--surface); padding:14px 18px calc(20px + env(safe-area-inset-bottom)); font-size:11.5px; color:var(--ink-3); line-height:1.5}
+  footer b{color:var(--ink-2); font-weight:600}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="card">
+    <div class="mk">📋</div>
+    <h2>PM Checklist</h2>
+    <p>Acesso restrito. Digite a senha.</p>
+    <input id="pw" type="password" inputmode="text" autocomplete="off" spellcheck="false" placeholder="Senha" autofocus>
+    <button id="go">Abrir</button>
+    <label><input type="checkbox" id="remember" checked> lembrar neste aparelho</label>
+    <div class="err" id="err"></div>
+  </div>
+</div>
+
+<div class="phone" id="app" hidden>
+  <header>
+    <div class="eyebrow">
+      <span>PM Checklist</span>
+      <span class="live"><span class="dot"></span><span id="gen">—</span></span>
+    </div>
+    <h1 id="h1">—</h1>
+    <div class="progress">
+      <div class="nums"><span>Feitos hoje</span><span><b id="pdone">0</b> / <b id="ptot">0</b></span></div>
+      <div class="bar"><i id="pbar"></i></div>
+    </div>
+  </header>
+
+  <div class="autonote" id="autonote" hidden>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+    <span id="autotext"></span>
+  </div>
+
+  <section id="agendasec" hidden>
+    <div class="lbl">Agenda <span class="count" id="agcount"></span></div>
+    <div class="agenda" id="agenda"></div>
+  </section>
+
+  <div class="tabs" role="tablist">
+    <div class="tab" role="tab" aria-selected="true" data-filter="open">Abertos<span class="n" id="n-open"></span></div>
+    <div class="tab" role="tab" aria-selected="false" data-filter="p0">🔴 P0<span class="n" id="n-p0"></span></div>
+    <div class="tab" role="tab" aria-selected="false" data-filter="done">Feito<span class="n" id="n-done"></span></div>
+  </div>
+  <p class="hint">toca no item pra marcar feito · segura pra adiar</p>
+
+  <div class="list" id="list"></div>
+
+  <footer>
+    Marcar aqui vira o <b>done-ledger</b>: teus checks persistem por item e alimentam a routine.
+    Fontes automáticas fecham o que deixa rastro (Gmail/Slack/Calendar) — o resto fecha com um toque.
+  </footer>
+</div>
+
+<script>
+const ENC = {salt:"M+MOmluwGryaVzOs8vfGVA==", iv:"E+TiQCOC8VSV5DID", ct:"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", iters:250000};
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const LS_KEY = "pm_checks_v1";
+
+async function deriveKey(pw, salt){
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name:"PBKDF2", salt, iterations:ENC.iters, hash:"SHA-256" },
+    base, { name:"AES-GCM", length:256 }, false, ["decrypt"]);
+}
+async function tryDecrypt(pw){
+  const key = await deriveKey(pw, b64(ENC.salt));
+  const plain = await crypto.subtle.decrypt({ name:"AES-GCM", iv:b64(ENC.iv) }, key, b64(ENC.ct));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+let DATA=null, filter="open";
+let checks = load();
+function load(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||"{}"); }catch(_){ return {}; } }
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(checks)); }
+
+async function unlock(isAuto){
+  const err=document.getElementById("err");
+  const pw=document.getElementById("pw").value;
+  if(!pw){ if(!isAuto) err.textContent="Digite a senha."; return; }
+  try{
+    DATA = await tryDecrypt(pw);
+    if(document.getElementById("remember").checked || isAuto) localStorage.setItem("pm_pw", pw);
+    document.getElementById("gate").style.display="none";
+    document.getElementById("app").hidden=false;
+    boot();
+  }catch(e){
+    localStorage.removeItem("pm_pw");
+    if(!isAuto){ err.textContent="Senha incorreta."; document.getElementById("pw").select(); }
+  }
+}
+
+function boot(){
+  document.getElementById("gen").textContent = "sync " + (DATA.generated||"");
+  document.getElementById("h1").innerHTML = (DATA.day_label||"") + ' <span class="day">· ' + (DATA.day_sub||"") + '</span>';
+  // agenda
+  const ag=DATA.agenda||[];
+  if(ag.length){
+    document.getElementById("agendasec").hidden=false;
+    document.getElementById("agcount").textContent = ag.length + (DATA.light_day?" · dia leve":" blocos");
+    document.getElementById("agenda").innerHTML = ag.map(m=>`
+      <div class="mtg"><span class="time">${m.time}</span>
+      <span class="mtitle">${m.title}<small>${m.sub||""}</small></span>
+      <span class="frentetag">${m.frente||""}</span></div>`).join("");
+  }
+  // autoclosed banner
+  const ac=DATA.autoclosed||[];
+  ac.forEach(a=>{ if(!checks[a.id]) checks[a.id]={s:"auto"}; });
+  if(ac.length){
+    document.getElementById("autonote").hidden=false;
+    document.getElementById("autotext").innerHTML = `<b>${ac.length} ${ac.length===1?"item fechado":"itens fechados"} automático</b> — lidos do teu Gmail Sent + calendário. Vê na aba <b>Feito</b>.`;
+  }
+  document.querySelectorAll(".tab").forEach(tab=>tab.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected","false"));
+    tab.setAttribute("aria-selected","true"); filter=tab.dataset.filter; render();
+  }));
+  render();
+}
+
+function allItems(){ return (DATA.autoclosed||[]).concat(DATA.items||[]); }
+function st(id){ return checks[id] && checks[id].s; }
+
+function render(){
+  const items=DATA.items||[];
+  const openItems=items.filter(d=>!st(d.id));
+  const p0Items=openItems.filter(d=>d.p0);
+  const doneItems=allItems().filter(d=>st(d.id)==="done"||st(d.id)==="auto");
+  document.getElementById("n-open").textContent=openItems.length;
+  document.getElementById("n-p0").textContent=p0Items.length;
+  document.getElementById("n-done").textContent=doneItems.length;
+
+  const manualTotal=items.length;
+  const manualDone=items.filter(d=>st(d.id)==="done").length;
+  document.getElementById("pdone").textContent=manualDone;
+  document.getElementById("ptot").textContent=manualTotal;
+  document.getElementById("pbar").style.width=(manualTotal? manualDone/manualTotal*100:0)+"%";
+
+  let show = filter==="done"?doneItems : filter==="p0"?p0Items : openItems;
+  const listEl=document.getElementById("list");
+  listEl.innerHTML="";
+  if(!show.length){ listEl.innerHTML='<div class="empty">nada aqui — 🎉</div>'; return; }
+  const groups={};
+  show.forEach(d=>{(groups[d.frente]=groups[d.frente]||[]).push(d)});
+  Object.keys(groups).forEach(fr=>{
+    const h=document.createElement("div"); h.className="grouphead"; h.textContent=fr; listEl.appendChild(h);
+    groups[fr].forEach(d=>listEl.appendChild(row(d)));
+  });
+}
+
+const CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+function row(d){
+  const el=document.createElement("div");
+  const s=st(d.id);
+  const isAuto=s==="auto";
+  el.className="item"+(d.sev?(" sev-"+d.sev):"")+(s==="done"?" done":"")+(isAuto?" done autoclosed":"");
+  let due="";
+  if(d.due){ const cls=d.dueSev==="red"?"due-red":d.dueSev==="amber"?"due-amber":"due-flat"; due=`<span class="pill ${cls}">${d.due}</span>`; }
+  el.innerHTML=`<div class="box">${CHECK}</div><div class="body"><div class="txt">${d.txt}</div>
+    <div class="meta"><span class="pill frente">${d.frente}</span>${due}<span class="src">${d.src||""}</span></div></div>`;
+  if(!isAuto){
+    let t=null;
+    el.addEventListener("pointerdown",()=>{ t=setTimeout(()=>{ t=null; snooze(d); },480); });
+    el.addEventListener("pointerup",()=>{ if(t){ clearTimeout(t); toggle(d); } });
+    el.addEventListener("pointercancel",()=>{ if(t){ clearTimeout(t); t=null; } });
+    el.addEventListener("pointerleave",()=>{ if(t){ clearTimeout(t); t=null; } });
+  }
+  return el;
+}
+function toggle(d){
+  if(st(d.id)==="done") delete checks[d.id];
+  else checks[d.id]={s:"done", ts:Date.now()};
+  save(); render();
+}
+function snooze(d){ checks[d.id]={s:"snooze", ts:Date.now()}; save(); render(); }
+
+document.getElementById("go").addEventListener("click",()=>unlock(false));
+document.getElementById("pw").addEventListener("keydown",e=>{ if(e.key==="Enter") unlock(false); });
+(function(){ const saved=localStorage.getItem("pm_pw"); if(saved){ document.getElementById("pw").value=saved; unlock(true); } })();
+</script>
+</body>
+</html>
